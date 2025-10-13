@@ -1,3 +1,4 @@
+#libs
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -6,12 +7,14 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
-
-from kivy.storage.jsonstore import JsonStore
 from dateutil.relativedelta import relativedelta
-import datetime
 import json
-import os
+
+#classes
+from classes.counter import Counter
+from classes.storage import Storage
+from classes.statistics import Statistics
+from classes.goal import Goal
 
 
 # Set background color to black
@@ -89,107 +92,6 @@ class BlackThemeUI(BoxLayout):
     def on_reset(self, instance):
         self.counter.reset()
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
-
-
-
-
-class Storage:
-    def __init__(self, storageKey):
-        self.storage = None
-        self.load_storage(storageKey)
-
-    def load_storage(self, storageKey):
-        if self.storage == None:
-            self.storage = JsonStore(f'./UserData/{storageKey}.json')
-
-    def persist(self, key, value):
-        self.storage.put(key, value=value)
-
-    def get(self, key):
-    	if self.storage.exists(key):
-    		return self.storage.get(key) or None
-    	else:
-    		return None
-
-class Statistics:
-    def __init__(self):
-        self.storageKey = 'current'
-        self.storage = Storage(self.storageKey)
-        self.key = 'timestamps'
-
-    def persist(self):
-        try:
-            currentValues = self.storage.get(self.key)['value'] or []
-        except:
-            currentValues = []
-        currentValues.append(
-            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        self.storage.persist(self.key, value=currentValues)
-
-    def archive(self):
-        old_file_name = f'{self.storageKey}.json'
-        if os.path.exists(old_file_name):
-            os.rename(old_file_name, f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json')
-        self.__init__()
-
-
-class Counter:
-    def __init__(self):
-        self.counter = 0
-        self.storageKey = 'counter'
-        self.storage = Storage(self.storageKey)
-        storedInfo = self.storage.get(self.storageKey)
-        if storedInfo is not None:
-            self.counter = storedInfo['value'] or 0
-
-    def persist(self):
-        self.storage.persist(key=self.storageKey, value=self.counter)
-
-    def increment(self):
-        self.counter += 1
-        self.storage.persist(key=self.storageKey, value=self.counter)
-        Statistics().persist()
-
-    def get(self):
-        return self.counter
-
-    def reset(self):
-        try:
-            Statistics().archive()
-            self.counter = 0
-            self.persist()
-        except:
-            print("error") #TODO: proper popout message when the user clicks twice the same minute
-
-
-class Goal:
-    def __init__(self):
-        self.goal = None
-        self.goalDate = None
-        self.storageKey_goal = 'goal'
-        self.storageKey_goalDate = 'goalDate'
-        self.storage = Storage('goals')
-
-        self.storage_goal = Storage(self.storageKey_goal)
-        self.storage_goalDate = Storage(self.storageKey_goalDate)
-
-        storedInfo_goal = self.storage.get(self.storageKey_goal)
-        if storedInfo_goal is not None:
-            self.goal = storedInfo_goal['value']
-
-        storedInfo_goalDate = self.storage.get(self.storageKey_goalDate)
-        if storedInfo_goalDate is not None:
-            self.goal = storedInfo_goalDate['value']
-
-    def get(self):
-        return self.goal
-
-    def set(self, goal):
-        self.goal = goal
-
-    def persist(self):
-        self.storage_goal.persist(key=self.storageKey_goal, value=self.goal)
-        self.storage_goalDate.persist(key=self.storageKey_goalDate, value=self.goalDate)
 
 class BlackApp(App):
     def build(self):
