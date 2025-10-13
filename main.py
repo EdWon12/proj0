@@ -100,7 +100,7 @@ class Storage:
 
     def load_storage(self, storageKey):
         if self.storage == None:
-            self.storage = JsonStore(f'{storageKey}.json')
+            self.storage = JsonStore(f'./UserData/{storageKey}.json')
 
     def persist(self, key, value):
         self.storage.put(key, value=value)
