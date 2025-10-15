@@ -4,28 +4,29 @@ from classes.storage import Storage
 class Goal:
     def __init__(self):
         self.goal = None
-        self.goalDate = None
+        self.date = None
         self.storageKey_goal = 'goal'
-        self.storageKey_goalDate = 'goalDate'
-        self.storage = Storage('goals')
-
-        self.storage_goal = Storage(self.storageKey_goal)
-        self.storage_goalDate = Storage(self.storageKey_goalDate)
+        self.storageKey_date = 'date'
+        self.storage = Storage('goal')
 
         storedInfo_goal = self.storage.get(self.storageKey_goal)
         if storedInfo_goal is not None:
             self.goal = storedInfo_goal['value']
 
-        storedInfo_goalDate = self.storage.get(self.storageKey_goalDate)
-        if storedInfo_goalDate is not None:
-            self.goal = storedInfo_goalDate['value']
+        storedInfo_date = self.storage.get(self.storageKey_date)
+        if storedInfo_date is not None:
+            self.date = storedInfo_date['value']
 
     def get(self):
-        return self.goal
+        return {
+            'goal': self.goal,
+            'date': self.date
+        }
 
-    def set(self, goal):
+    def set(self, goal, date):
         self.goal = goal
+        self.date = date
 
     def persist(self):
-        self.storage_goal.persist(key=self.storageKey_goal, value=self.goal)
-        self.storage_goalDate.persist(key=self.storageKey_goalDate, value=self.goalDate)
+        self.storage.persist(key=self.storageKey_goal, value=self.goal)
+        self.storage.persist(key=self.storageKey_date, value=self.date)
