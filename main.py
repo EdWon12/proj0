@@ -10,8 +10,7 @@ from kivymd.app import MDApp
 from kivymd.uix.pickers import MDDatePicker
 from dateutil.relativedelta import relativedelta
 from kivy.graphics import Color, Rectangle
-from datetime import datetime, timedelta
-
+from datetime import datetime, timedelta, date
 import json
 
 #classes
@@ -47,10 +46,13 @@ class BlackThemeUI(BoxLayout):
         self.grid.bind(minimum_height=self.grid.setter('height'))
 
         #Goal popup setup
+        self.date_input = None
         self.popup_goals_layout = BoxLayout(orientation='vertical', spacing=10, padding=10, height=500, width=500)
+        self.popup_goals_layout.current_input = TextInput(hint_text='Current daily amount of smokes', size_hint_y=None, height=30, input_filter='int')
         self.popup_goals_layout.goal_input = TextInput(hint_text='Target number (best is 0)', size_hint_y=None, height=30, input_filter='int')
         self.label = Label(text="Select a target date for the Goal")
         self.popup_goals_layout.goal_close_btn = Button(text="OK", size_hint=(1, None), height=50)
+        self.popup_goals_layout.add_widget(self.popup_goals_layout.current_input)
         self.popup_goals_layout.add_widget(self.popup_goals_layout.goal_input)
 
         self.popup_goals_layout.pick_button = Button(text="Select an end date for the goal")
@@ -58,9 +60,9 @@ class BlackThemeUI(BoxLayout):
         self.popup_goals_layout.add_widget(self.popup_goals_layout.pick_button)
         self.popup_goals_layout.add_widget(self.popup_goals_layout.goal_close_btn)
         
-        self.popup_goals_layout.goal_close_btn.bind(on_press=self.on_submit)
+        self.popup_goals_layout.goal_close_btn.bind(on_press=self.on_submit_goal_popup)
 
-        self.popup_goals = Popup(title="Goals popup",
+        self.popup_goals = Popup(title="Target goals",
                                         content=self.popup_goals_layout,
                                         size_hint=(None, None),
                                         size=(400, 300),
@@ -99,8 +101,22 @@ class BlackThemeUI(BoxLayout):
         self.rect.pos = self.pos
         self.rect.size = self.size
 
-    def on_submit(self, instance):
-        self.goal.set(goal=int(self.popup_goals_layout.goal_input.text), date=self.date_input.strftime("%d-%m-%Y"))
+    def validate_goal_popup(self):
+        if self.date_input is not None and self.date_input <= date.today():
+            return False
+        if self.popup_goals_layout.goal_input.text is not None and self.popup_goals_layout.current_input.text is not None:
+            try:
+                int(self.popup_goals_layout.goal_input.text)
+                int(self.popup_goals_layout.current_input.text)
+            except:
+                return False
+        return True
+
+    def on_submit_goal_popup(self, instance):
+        isValid = self.validate_goal_popup()
+        if isValid is False:
+            return
+        self.goal.set(goal=int(self.popup_goals_layout.goal_input.text), date=self.date_input.strftime("%d-%m-%Y"), previousUsage=int(self.popup_goals_layout.current_input.text))
         self.goal.persist()
         self.goal_label.text = f"Goal: {self.goal.get()['goal']} {self.date_input.strftime("%d-%m-%Y")}"
         self.close_goals_popup()
@@ -114,8 +130,7 @@ class BlackThemeUI(BoxLayout):
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
 
     def open_date_picker(self, instance):
-        print(datetime.now().date() + timedelta(days=1))
-        date_picker = MDDatePicker(min_date=datetime.now().date() + timedelta(days=1)) #TODO: min date not working
+        date_picker = MDDatePicker()
         date_picker.bind(on_save=self.on_date_selected)
         date_picker.open()
     
@@ -125,6 +140,7 @@ class BlackThemeUI(BoxLayout):
 
     def on_date_selected(self, instance, value, date_range):
         self.date_input = value
+
 class BlackApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Dark"
@@ -133,7 +149,3 @@ class BlackApp(MDApp):
 
 if __name__ == '__main__':
     BlackApp().run()
-
-#now = datetime.now()
-#next_month = now + relativedelta(months=1)
-
