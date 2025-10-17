@@ -6,6 +6,6 @@ Install required packages by following errors and imports (built for py version 
 * <pre>py main.py</pre>
   
 ## PROGRESS / TODO  
-* finish the UI and the main alghorithm  
+* finish the main alghorithm  
 * build apk for android via buildozer  
 * finish the README.md installation instructions  

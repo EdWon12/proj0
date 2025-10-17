@@ -19,10 +19,13 @@ from classes.storage import Storage
 from classes.statistics import Statistics
 from classes.goal import Goal
 
+#const
+date_format = "%d-%m-%Y"
+
 #Set background color to black
 Window.clearcolor = (0, 0, 0, 1)  #RGBA
 
-#TODO the ui and main algorithm
+#TODO main algorithm
 class BlackThemeUI(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='vertical', padding=20, spacing=20, **kwargs)
@@ -35,6 +38,7 @@ class BlackThemeUI(BoxLayout):
 
         self.counter = Counter()
         self.goal = Goal()
+        self.left_today = 0
 
         print(f"the goal value {self.goal.get()}")
 
@@ -77,7 +81,8 @@ class BlackThemeUI(BoxLayout):
         self.grid.add_widget(self.grid.current_count)
 
         #Placeholder for "Left today"
-        self.grid.add_widget(Label(text="Left today:", color=(1, 1, 1, 1)))
+        self.grid.left_today = Label(text=f"Left today: {self.left_today}", color=(1, 1, 1, 1))
+        self.grid.add_widget(self.grid.left_today)
 
         self.add_widget(self.grid)
 
@@ -124,6 +129,8 @@ class BlackThemeUI(BoxLayout):
     def on_smoke(self, instance):
         self.counter.increment()
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
+        self.grid.left_today.text = f"Left today: {self.left_today}"
+        self.calculate_left_today()
 
     def on_reset(self, instance):
         self.counter.reset()
@@ -140,6 +147,21 @@ class BlackThemeUI(BoxLayout):
 
     def on_date_selected(self, instance, value, date_range):
         self.date_input = value
+    
+    def calculate_left_today(self):
+        goals = self.goal.get()
+        goal = goals['goal']
+        date = datetime.strptime(goals['date'], date_format).date()
+        previousUsage = goals['previousUsage']
+        previousDate = datetime.strptime(goals['previousDate'], date_format).date()
+        now = date.today()
+        
+        #finish alghorithm
+
+        print(previousDate)
+        print(date)
+        print(now)
+
 
 class BlackApp(MDApp):
     def build(self):
