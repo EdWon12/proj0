@@ -6,6 +6,8 @@ Install required packages by following errors and imports (built for py version 
 * <pre>py main.py</pre>
   
 ## PROGRESS / TODO  
-* finish the main alghorithm  
+* refactor / cleanup / add prettier  
 * build apk for android via buildozer  
 * finish the README.md installation instructions  
+* publish MVP  
+* maybe implement restrictions, but seems like useless anyway if someones gonna cheat no need for an app  
