@@ -40,8 +40,6 @@ class BlackThemeUI(BoxLayout):
         self.goal = Goal()
         self.left_today = 0
 
-        print(f"the goal value {self.goal.get()}")
-
         #Title label
         self.add_widget(Label(text="Please stop!", font_size=24, color=(1, 1, 1, 1)))
 
@@ -72,10 +70,6 @@ class BlackThemeUI(BoxLayout):
                                         size=(400, 300),
                                         auto_dismiss=False)
 
-        #Goal popup if not set
-        if self.goal.get()['goal'] is None or self.goal.get()['date'] is None:
-            self.grid.add_widget(self.popup_goals)
-
         #Current count label
         self.grid.current_count = Label(text=f"Current count: {self.counter.get()}", color=(1, 1, 1, 1))
         self.grid.add_widget(self.grid.current_count)
@@ -85,6 +79,12 @@ class BlackThemeUI(BoxLayout):
         self.grid.add_widget(self.grid.left_today)
 
         self.add_widget(self.grid)
+
+        #Goal popup if not set
+        if self.goal.get()['goal'] is None or self.goal.get()['date'] is None:
+            self.grid.add_widget(self.popup_goals)
+        else:
+            self.calculate_left_today()
 
         #Button smoke
         self.smoke_btn = Button(text="SMOKE", size_hint=(1, None), height=50, background_color=(0.2, 0.6, 0.8, 1))
@@ -99,8 +99,6 @@ class BlackThemeUI(BoxLayout):
         #Goal Label
         self.goal_label = Label(text=f'Goal: {'unkown' if self.goal.get()['goal'] is None or self.goal.get()['date'] is None else f"{self.goal.get()['goal']} {self.goal.get()['date']}"}', color=(0.8, 0.8, 0.8, 1))
         self.add_widget(self.goal_label)
-
-        #TODO add left for today
 
     def _update_rect(self, *args):
         self.rect.pos = self.pos
@@ -125,16 +123,17 @@ class BlackThemeUI(BoxLayout):
         self.goal.persist()
         self.goal_label.text = f"Goal: {self.goal.get()['goal']} {self.date_input.strftime("%d-%m-%Y")}"
         self.close_goals_popup()
+        self.calculate_left_today()
 
     def on_smoke(self, instance):
         self.counter.increment()
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
-        self.grid.left_today.text = f"Left today: {self.left_today}"
         self.calculate_left_today()
 
     def on_reset(self, instance):
         self.counter.reset()
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
+        self.calculate_left_today()
 
     def open_date_picker(self, instance):
         date_picker = MDDatePicker()
@@ -155,13 +154,15 @@ class BlackThemeUI(BoxLayout):
         previousUsage = goals['previousUsage']
         previousDate = datetime.strptime(goals['previousDate'], date_format).date()
         now = date.today()
+
+        total_diff = (date - now).days
+        goal_diff = self.goal.get()['previousUsage'] - self.goal.get()['goal']
+
+        reduction_rate =  goal_diff / total_diff
         
-        #finish alghorithm
-
-        print(previousDate)
-        print(date)
-        print(now)
-
+        self.left_today = round(previousUsage - (max(1, (now - previousDate).days) * reduction_rate)) - self.counter.get()
+        
+        self.grid.left_today.text = f"Left today: {self.left_today}"
 
 class BlackApp(MDApp):
     def build(self):
