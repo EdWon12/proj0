@@ -1,6 +1,7 @@
 #libs
 import datetime
 import os
+from kivy.app import App
 
 #classes
 from classes.storage import Storage
@@ -21,7 +22,7 @@ class Statistics:
         self.storage.persist(self.key, value=currentValues)
 
     def archive(self):
-        old_file_name = f'./UserData/{self.storageKey}.json'
+        old_file_name = f'{App.get_running_app().user_data_dir}/stopsmoking/UserData/{self.storageKey}.json'
         if os.path.exists(old_file_name):
-            os.rename(old_file_name, f'./UserData/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json')
+            os.rename(old_file_name, f'{App.get_running_app().user_data_dir}/stopsmoking/UserData/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json')
         self.__init__()
