@@ -15,6 +15,12 @@ from datetime import datetime, timedelta, date
 from kivy.app import App
 import json
 import os
+from kivy.utils import platform
+from os.path import join
+from android.storage import app_storage_path
+
+if platform == 'android':
+    path = app_storage_path()
 
 #classes
 from classes.counter import Counter
@@ -33,7 +39,7 @@ class BlackThemeUI(BoxLayout):
         super().__init__(orientation='vertical', padding=20, spacing=20, **kwargs)
 
         #Create UserData dir
-        config_path = os.path.expanduser(f'{App.get_running_app().user_data_dir}/stopsmoking/UserData/')
+        config_path = os.path.expanduser(join(path, '/UserData/'))
         if not os.path.exists(config_path):
             os.makedirs(config_path)
 
