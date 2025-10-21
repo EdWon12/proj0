@@ -12,7 +12,6 @@ from dateutil.relativedelta import relativedelta
 from kivy.graphics import Color, Rectangle
 from kivy.metrics import sp
 from datetime import datetime, timedelta, date
-from kivy.app import App
 import json
 import os
 from kivy.utils import platform

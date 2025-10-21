@@ -1,6 +1,5 @@
 #libs
 from kivy.storage.jsonstore import JsonStore
-from kivy.app import App
 from kivy.utils import platform
 from os.path import join
 from android.storage import app_storage_path
