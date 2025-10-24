@@ -7,7 +7,5 @@ Install required packages by following errors and imports (built for py version 
   
 ## PROGRESS / TODO  
 * refactor / cleanup  
-* build apk for android via buildozer  
-* finish the README.md installation instructions  
-* publish MVP  
-* maybe implement restrictions, but seems like useless anyway if someones gonna cheat no need for an app  
+* rebuild apk for android via buildozer  
+* improve alghorithm: make new day automatically reset count, add average remainer left till midnight
