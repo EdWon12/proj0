@@ -1,6 +1,15 @@
 #libs
 import datetime
 import os
+from kivy.app import App
+from kivy.utils import platform
+from os.path import join
+
+if platform == 'android':
+    from android.storage import app_storage_path
+    path = app_storage_path()
+else:
+    path = './'
 
 #classes
 from classes.storage import Storage
@@ -21,7 +30,7 @@ class Statistics:
         self.storage.persist(self.key, value=currentValues)
 
     def archive(self):
-        old_file_name = f'./UserData/{self.storageKey}.json'
+        old_file_name = join(path, f'UserData/{self.storageKey}.json')
         if os.path.exists(old_file_name):
-            os.rename(old_file_name, f'./UserData/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json')
+            os.rename(old_file_name, join(path, f'UserData/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json'))
         self.__init__()

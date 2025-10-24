@@ -1,2 +1,3 @@
 /UserData/*.json
 **/__pycache__/*
+**/.buildozer/*

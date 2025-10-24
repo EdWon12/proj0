@@ -10,8 +10,18 @@ from kivymd.app import MDApp
 from kivymd.uix.pickers import MDDatePicker
 from dateutil.relativedelta import relativedelta
 from kivy.graphics import Color, Rectangle
+from kivy.metrics import sp
 from datetime import datetime, timedelta, date
+from kivy.app import App
 import json
+import os
+from kivy.utils import platform
+
+if platform == 'android':
+    from android.storage import app_storage_path
+    path = app_storage_path()
+else:
+    path = '.'
 
 #classes
 from classes.counter import Counter
@@ -25,10 +35,14 @@ date_format = "%d-%m-%Y"
 #Set background color to black
 Window.clearcolor = (0, 0, 0, 1)  #RGBA
 
-#TODO main algorithm
 class BlackThemeUI(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='vertical', padding=20, spacing=20, **kwargs)
+
+        #Create UserData dir
+        config_path = os.path.join(path, 'UserData')
+        if not os.path.exists(config_path):
+            os.makedirs(config_path)
 
         #Draw black background
         with self.canvas.before:
@@ -41,23 +55,22 @@ class BlackThemeUI(BoxLayout):
         self.left_today = 0
 
         #Title label
-        self.add_widget(Label(text="Please stop!", font_size=24, color=(1, 1, 1, 1)))
+        self.add_widget(Label(text="Please stop!", font_size=sp(24), color=(1, 1, 1, 1)))
 
         #Grid for inputs
-        self.grid = GridLayout(cols=2, spacing=10, size_hint_y=None)
+        self.grid = GridLayout(cols=2, spacing=10, size_hint=[1, 1])
         self.grid.bind(minimum_height=self.grid.setter('height'))
 
         #Goal popup setup
         self.date_input = None
-        self.popup_goals_layout = BoxLayout(orientation='vertical', spacing=10, padding=10, height=500, width=500)
-        self.popup_goals_layout.current_input = TextInput(hint_text='Current daily amount of smokes', size_hint_y=None, height=30, input_filter='int')
-        self.popup_goals_layout.goal_input = TextInput(hint_text='Target number (best is 0)', size_hint_y=None, height=30, input_filter='int')
-        self.label = Label(text="Select a target date for the Goal")
-        self.popup_goals_layout.goal_close_btn = Button(text="OK", size_hint=(1, None), height=50)
+        self.popup_goals_layout = BoxLayout(orientation='vertical', spacing=10, padding=10, size_hint=([1, 1]), pos_hint={'x': 0, 'y': 0})
+        self.popup_goals_layout.current_input = TextInput(hint_text='Current daily amount of smokes', input_filter='int', size_hint=([1, 0.05]), pos_hint={'x': 0, 'y': 0})
+        self.popup_goals_layout.goal_input = TextInput(hint_text='Target number (best is 0)', input_filter='int', size_hint=([1, 0.05]), pos_hint={'x': 0, 'y': 0.2})
+        self.popup_goals_layout.goal_close_btn = Button(text="OK", size_hint=([1, 0.05]), pos_hint={'x': 0, 'y': 0.8})
         self.popup_goals_layout.add_widget(self.popup_goals_layout.current_input)
         self.popup_goals_layout.add_widget(self.popup_goals_layout.goal_input)
 
-        self.popup_goals_layout.pick_button = Button(text="Select an end date for the goal")
+        self.popup_goals_layout.pick_button = Button(text="Select an end date for the goal", size_hint=([1, 0.05]), pos_hint={'x': 0, 'y': 0.8})
         self.popup_goals_layout.pick_button.bind(on_release=self.open_date_picker)
         self.popup_goals_layout.add_widget(self.popup_goals_layout.pick_button)
         self.popup_goals_layout.add_widget(self.popup_goals_layout.goal_close_btn)
@@ -66,9 +79,7 @@ class BlackThemeUI(BoxLayout):
 
         self.popup_goals = Popup(title="Target goals",
                                         content=self.popup_goals_layout,
-                                        size_hint=(None, None),
-                                        size=(400, 300),
-                                        auto_dismiss=False)
+                                        size_hint=[2, 2])
 
         #Current count label
         self.grid.current_count = Label(text=f"Current count: {self.counter.get()}", color=(1, 1, 1, 1))
@@ -87,17 +98,27 @@ class BlackThemeUI(BoxLayout):
             self.calculate_left_today()
 
         #Button smoke
-        self.smoke_btn = Button(text="SMOKE", size_hint=(1, None), height=50, background_color=(0.2, 0.6, 0.8, 1))
+        self.smoke_btn = Button(text="SMOKE", size_hint=([1, None]), background_color=(0.2, 0.6, 0.8, 1))
         self.smoke_btn.bind(on_press=self.on_smoke)
         self.add_widget(self.smoke_btn)
 
         #Button new day
-        self.new_day_btn = Button(text="NEW DAY", size_hint=(1, None), height=50, background_color=(0.2, 0.6, 0.8, 1))
+        self.new_day_btn = Button(text="NEW DAY", size_hint=([1, None]), background_color=(0.2, 0.6, 0.8, 1))
         self.new_day_btn.bind(on_press=self.on_reset)
         self.add_widget(self.new_day_btn)
 
         #Goal Label
-        self.goal_label = Label(text=f'Goal: {'unkown' if self.goal.get()['goal'] is None or self.goal.get()['date'] is None else f"{self.goal.get()['goal']} {self.goal.get()['date']}"}', color=(0.8, 0.8, 0.8, 1))
+        goal_data = self.goal.get()
+        goal_text = "unknown"
+
+        if goal_data["goal"] is not None and goal_data["date"] is not None:
+            goal_text = f"{goal_data['goal']} {goal_data['date']}"
+
+        self.goal_label = Label(
+            text=f"Goal: {goal_text}",
+            color=(0.8, 0.8, 0.8, 1)
+        )
+
         self.add_widget(self.goal_label)
 
     def _update_rect(self, *args):
@@ -119,9 +140,9 @@ class BlackThemeUI(BoxLayout):
         isValid = self.validate_goal_popup()
         if isValid is False:
             return
-        self.goal.set(goal=int(self.popup_goals_layout.goal_input.text), date=self.date_input.strftime("%d-%m-%Y"), previousUsage=int(self.popup_goals_layout.current_input.text))
+        self.goal.set(goal=int(self.popup_goals_layout.goal_input.text), date=self.date_input.strftime(date_format), previousUsage=int(self.popup_goals_layout.current_input.text))
         self.goal.persist()
-        self.goal_label.text = f"Goal: {self.goal.get()['goal']} {self.date_input.strftime("%d-%m-%Y")}"
+        self.goal_label.text = f"Goal: {self.goal.get()['goal']} {self.date_input.strftime(date_format)}"
         self.close_goals_popup()
         self.calculate_left_today()
 
@@ -170,5 +191,6 @@ class BlackApp(MDApp):
         self.theme_cls.primary_palette = "BlueGray"
         return BlackThemeUI()
 
-if __name__ == '__main__':
-    BlackApp().run()
+BlackApp().run()
+
+
