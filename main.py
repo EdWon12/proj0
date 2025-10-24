@@ -12,14 +12,16 @@ from dateutil.relativedelta import relativedelta
 from kivy.graphics import Color, Rectangle
 from kivy.metrics import sp
 from datetime import datetime, timedelta, date
+from kivy.app import App
 import json
 import os
 from kivy.utils import platform
-from os.path import join
-from android.storage import app_storage_path
 
 if platform == 'android':
+    from android.storage import app_storage_path
     path = app_storage_path()
+else:
+    path = '.'
 
 #classes
 from classes.counter import Counter
@@ -38,7 +40,7 @@ class BlackThemeUI(BoxLayout):
         super().__init__(orientation='vertical', padding=20, spacing=20, **kwargs)
 
         #Create UserData dir
-        config_path = os.path.expanduser(join(path, '/UserData/'))
+        config_path = os.path.join(path, 'UserData')
         if not os.path.exists(config_path):
             os.makedirs(config_path)
 
@@ -189,13 +191,6 @@ class BlackApp(MDApp):
         self.theme_cls.primary_palette = "BlueGray"
         return BlackThemeUI()
 
-if __name__ == '__main__':
-    from kivy.logger import Logger
-    try:
-        Logger.info("App starting")
-        BlackApp().run()
-        Logger.info("App ended")
-    except Exception as e:
-        Logger.error(f"BlackApp: Uncaught exception: {e}")
+BlackApp().run()
 
 
