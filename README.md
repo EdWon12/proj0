@@ -8,4 +8,4 @@ Install required packages by following errors and imports (built for py version 
 ## PROGRESS / TODO  
 * refactor / cleanup  
 * rebuild apk for android via buildozer  
-* improve alghorithm: make new day automatically reset count, add average remainer left till midnight
+* improve alghorithm: make new day automatically reset count
