@@ -32,5 +32,5 @@ class Statistics:
     def archive(self):
         old_file_name = join(path, f'UserData/{self.storageKey}.json')
         if os.path.exists(old_file_name):
-            os.rename(old_file_name, join(path, f'UserData/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json'))
+            os.rename(old_file_name, join(path, f'UserData/{datetime.datetime.now().strftime("%Y-%m-%d")}.json'))
         self.__init__()

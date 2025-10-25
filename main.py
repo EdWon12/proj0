@@ -53,12 +53,13 @@ class BlackThemeUI(BoxLayout):
         self.counter = Counter()
         self.goal = Goal()
         self.left_today = 0
+        self.left_average = 0
 
         #Title label
         self.add_widget(Label(text="Please stop!", font_size=sp(24), color=(1, 1, 1, 1)))
 
         #Grid for inputs
-        self.grid = GridLayout(cols=2, spacing=10, size_hint=[1, 1])
+        self.grid = GridLayout(cols=12, spacing=10, size_hint=[1, 1])
         self.grid.bind(minimum_height=self.grid.setter('height'))
 
         #Goal popup setup
@@ -85,9 +86,13 @@ class BlackThemeUI(BoxLayout):
         self.grid.current_count = Label(text=f"Current count: {self.counter.get()}", color=(1, 1, 1, 1))
         self.grid.add_widget(self.grid.current_count)
 
-        #Placeholder for "Left today"
+        #Left today
         self.grid.left_today = Label(text=f"Left today: {self.left_today}", color=(1, 1, 1, 1))
         self.grid.add_widget(self.grid.left_today)
+
+        #Left average
+        self.grid.left_average = Label(text=f"Left average: {self.left_average} minutes", color=(1, 1, 1, 1))
+        self.grid.add_widget(self.grid.left_average)
 
         self.add_widget(self.grid)
 
@@ -175,6 +180,7 @@ class BlackThemeUI(BoxLayout):
         previousUsage = goals['previousUsage']
         previousDate = datetime.strptime(goals['previousDate'], date_format).date()
         now = date.today()
+        midnight =  datetime.combine(datetime.now().date() + timedelta(days=1), datetime.min.time())
 
         total_diff = (date - now).days
         goal_diff = self.goal.get()['previousUsage'] - self.goal.get()['goal']
@@ -182,8 +188,11 @@ class BlackThemeUI(BoxLayout):
         reduction_rate =  goal_diff / total_diff
         
         self.left_today = round(previousUsage - (max(1, (now - previousDate).days) * reduction_rate)) - self.counter.get()
-        
+
+        self.left_average = 0 if self.left_today <= 0 else int(((midnight - datetime.now()).total_seconds() / 60) / self.left_today)
+
         self.grid.left_today.text = f"Left today: {self.left_today}"
+        self.grid.left_average.text = f"Left average: {self.left_average} minutes"
 
 class BlackApp(MDApp):
     def build(self):
