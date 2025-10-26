@@ -107,11 +107,6 @@ class BlackThemeUI(BoxLayout):
         self.smoke_btn.bind(on_press=self.on_smoke)
         self.add_widget(self.smoke_btn)
 
-        #Button new day
-        self.new_day_btn = Button(text="NEW DAY", size_hint=([1, None]), background_color=(0.2, 0.6, 0.8, 1))
-        self.new_day_btn.bind(on_press=self.on_reset)
-        self.add_widget(self.new_day_btn)
-
         #Goal Label
         goal_data = self.goal.get()
         goal_text = "unknown"
@@ -123,6 +118,15 @@ class BlackThemeUI(BoxLayout):
             text=f"Goal: {goal_text}",
             color=(0.8, 0.8, 0.8, 1)
         )
+
+        now = date.today()
+        startDate = None
+
+        if (goal_data["previousDate"] != None):
+            startDate = datetime.strptime(goal_data["previousDate"], "%d-%m-%Y").date()
+
+        if startDate != now and Statistics().isLastYesterday() is False:
+            self.on_reset()
 
         self.add_widget(self.goal_label)
 
@@ -156,7 +160,7 @@ class BlackThemeUI(BoxLayout):
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
         self.calculate_left_today()
 
-    def on_reset(self, instance):
+    def on_reset(self):
         self.counter.reset()
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
         self.calculate_left_today()
@@ -176,6 +180,8 @@ class BlackThemeUI(BoxLayout):
     def calculate_left_today(self):
         goals = self.goal.get()
         goal = goals['goal']
+        if goals['date'] == None:
+            return
         date = datetime.strptime(goals['date'], date_format).date()
         previousUsage = goals['previousUsage']
         previousDate = datetime.strptime(goals['previousDate'], date_format).date()
