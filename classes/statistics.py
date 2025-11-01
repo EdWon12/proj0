@@ -41,3 +41,13 @@ class Statistics:
             return True
         else:
             return False
+    
+    def getLastSmoke(self):
+        try:
+            currentValues = self.storage.get(self.key)['value'] or []
+        except:
+            currentValues = []
+        lastSmoke = "yesterday"
+        if len(currentValues) > 0:
+            lastSmoke = f'{((datetime.datetime.now() - datetime.datetime.strptime(currentValues[-1], "%Y-%m-%d %H:%M:%S")).total_seconds() / 60):.0f} minutes ago'
+        return lastSmoke

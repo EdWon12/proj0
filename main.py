@@ -96,6 +96,10 @@ class BlackThemeUI(BoxLayout):
 
         self.add_widget(self.grid)
 
+        #Left average
+        self.last_smoke = Label(text=f"Last smoke: {Statistics().getLastSmoke()}", color=(1, 1, 1, 1))
+        self.add_widget(self.last_smoke)
+
         #Goal popup if not set
         if self.goal.get()['goal'] is None or self.goal.get()['date'] is None:
             self.grid.add_widget(self.popup_goals)
@@ -158,6 +162,7 @@ class BlackThemeUI(BoxLayout):
     def on_smoke(self, instance):
         self.counter.increment()
         self.grid.current_count.text = f"Current count: {self.counter.get()}"
+        self.last_smoke.text = f"Last smoke: {Statistics().getLastSmoke()}"
         self.calculate_left_today()
 
     def on_reset(self):

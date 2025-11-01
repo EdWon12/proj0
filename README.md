@@ -7,3 +7,6 @@ Install required packages by following errors and imports (built for py version 
   
 ## PROGRESS / TODO  
 * refactor / cleanup  
+* maybe add a sleep and wakeup button  
+* add quotes  
+* add positive reinforcement from statistics  
